@@ -3,8 +3,16 @@ import { DndProvider } from "react-dnd"
 import { HTML5Backend, NativeTypes } from "react-dnd-html5-backend"
 import { useDrop } from "react-dnd"
 import { PDFDocument } from "pdf-lib"
-import { saveAs } from "file-saver"
-import "./App.css"
+import {saveAs} from "file-saver"
+import styled, { createGlobalStyle } from 'styled-components'
+
+const GlobalStyle = createGlobalStyle`
+  html * {
+    font-size: 1em !important;
+    color: #000 !important;
+    font-family: Arial !important;
+  }
+`
 
 const list = (files) => {
   const label = (file) =>
@@ -14,18 +22,22 @@ const list = (files) => {
 
 const FileList = ({ files }) => {
   if (files.length === 0) {
-    return <div>Nothing to display</div>
+    return <div>&#129428;</div>
   }
   return <div>{list(files)}</div>
 }
 
-const style = {
-  border: "1px solid gray",
-  height: "15rem",
-  width: "15rem",
-  padding: "2rem",
-  textAlign: "center",
-}
+const Div = styled.div`
+  border: 1px solid gray;
+  height: 15rem;
+  width: 15rem;
+  padding: 2rem;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 1rem;
+`
 
 const TargetBox = (props) => {
   const { onDrop } = props
@@ -47,11 +59,21 @@ const TargetBox = (props) => {
 
   const isActive = canDrop && isOver
   return (
-    <div ref={drop} style={style}>
+    <Div ref={drop}>
       {isActive ? "Release to drop" : "Drag file here"}
-    </div>
+    </Div>
   )
 }
+
+const Container = styled.div`
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  background: #F8F9FA;
+`
 
 function App() {
   const [droppedFiles, setDroppedFiles] = useState([])
@@ -66,12 +88,9 @@ function App() {
     [setDroppedFiles]
   )
   useEffect(() => {
-    // const existingPdfBytes = await fetch(url).then((res) => res.arrayBuffer())
     if (droppedFiles.length) {
       droppedFiles.forEach(async (file) => {
-        console.log(file)
         const existingPdfBytes = await file.arrayBuffer()
-
         const pdfDocInput = await PDFDocument.load(existingPdfBytes)
         const pdfDocOutput = await PDFDocument.create()
         const pages = pdfDocInput.getPages()
@@ -91,10 +110,15 @@ function App() {
   }, [droppedFiles])
 
   return (
-    <DndProvider backend={HTML5Backend}>
+    <>
+      <GlobalStyle />
+      <DndProvider backend={HTML5Backend}>
+    <Container>
       <TargetBox onDrop={handleFileDrop} />
       <FileList files={droppedFiles} />
+    </Container>
     </DndProvider>
+    </>
   )
 }
 
