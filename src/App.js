@@ -15,19 +15,6 @@ const GlobalStyle = createGlobalStyle`
   }
 `
 
-const list = (files) => {
-  const label = (file) =>
-    `'${file.name}' of size '${file.size}'`
-  return files.map((file) => <li key={file.name}>{label(file)}</li>)
-}
-
-const FileList = ({ files }) => {
-  if (files.length === 0) {
-    return <div>&#129428;</div>
-  }
-  return <div>{list(files)}</div>
-}
-
 const Div = styled.div`
   border: 1px solid gray;
   height: 15rem;
@@ -63,14 +50,14 @@ const TargetBox = (props) => {
 }
 
 const Container = styled.div`
-  width: 100vw;
-  height: 100vh;
+  height: calc(100vh - 16px);
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  background: #f8f9fa;
 `
+// background: #f8f9fa;
+// width: 100vw;
 
 function App() {
   const [success, setSuccess] = useState(false)
@@ -127,7 +114,6 @@ function App() {
       <DndProvider backend={HTML5Backend}>
         <Container>
           <TargetBox onDrop={handleFileDrop} />
-          <FileList files={droppedFiles} />
           <Confetti active={success} config={config} />
         </Container>
       </DndProvider>
