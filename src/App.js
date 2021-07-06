@@ -11,13 +11,13 @@ const GlobalStyle = createGlobalStyle`
   html * {
     font-size: 1em !important;
     color: #000 !important;
-    font-family: Arial !important;
+    font-family: Open Sans !important;
   }
 `
 
 const list = (files) => {
   const label = (file) =>
-    `'${file.name}' of size '${file.size}' and type '${file.type}'`
+    `'${file.name}' of size '${file.size}'`
   return files.map((file) => <li key={file.name}>{label(file)}</li>)
 }
 
@@ -59,7 +59,7 @@ const TargetBox = (props) => {
   )
 
   const isActive = canDrop && isOver
-  return <Div ref={drop}>{isActive ? "Release to drop" : "Drag file here"}</Div>
+  return <Div ref={drop}>{isActive ? "Release to drop" : "Drag PDFs here"}</Div>
 }
 
 const Container = styled.div`
