@@ -3,8 +3,9 @@ import { DndProvider } from "react-dnd"
 import { HTML5Backend, NativeTypes } from "react-dnd-html5-backend"
 import { useDrop } from "react-dnd"
 import { PDFDocument } from "pdf-lib"
-import {saveAs} from "file-saver"
-import styled, { createGlobalStyle } from 'styled-components'
+import { saveAs } from "file-saver"
+import styled, { createGlobalStyle } from "styled-components"
+import Confetti from "react-dom-confetti"
 
 const GlobalStyle = createGlobalStyle`
   html * {
@@ -58,11 +59,7 @@ const TargetBox = (props) => {
   )
 
   const isActive = canDrop && isOver
-  return (
-    <Div ref={drop}>
-      {isActive ? "Release to drop" : "Drag file here"}
-    </Div>
-  )
+  return <Div ref={drop}>{isActive ? "Release to drop" : "Drag file here"}</Div>
 }
 
 const Container = styled.div`
@@ -72,10 +69,11 @@ const Container = styled.div`
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  background: #F8F9FA;
+  background: #f8f9fa;
 `
 
 function App() {
+  const [success, setSuccess] = useState(false)
   const [droppedFiles, setDroppedFiles] = useState([])
 
   const handleFileDrop = useCallback(
@@ -105,19 +103,34 @@ function App() {
           type: "application/pdf;charset=utf-8",
         })
         saveAs(blob, `${Date.now()}-${file.name}`)
+        setSuccess(true)
       })
     }
   }, [droppedFiles])
+  const config = {
+    angle: "25",
+    spread: "360",
+    startVelocity: "58",
+    elementCount: "200",
+    dragFriction: "0.13",
+    duration: "10000",
+    stagger: "3",
+    width: "11px",
+    height: "11px",
+    perspective: "303px",
+    colors: ["#a864fd", "#29cdff", "#78ff44", "#ff718d", "#fdff6a"],
+  }
 
   return (
     <>
       <GlobalStyle />
       <DndProvider backend={HTML5Backend}>
-    <Container>
-      <TargetBox onDrop={handleFileDrop} />
-      <FileList files={droppedFiles} />
-    </Container>
-    </DndProvider>
+        <Container>
+          <TargetBox onDrop={handleFileDrop} />
+          <FileList files={droppedFiles} />
+          <Confetti active={success} config={config} />
+        </Container>
+      </DndProvider>
     </>
   )
 }
