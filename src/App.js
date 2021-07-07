@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react"
+import { useState, useCallback, useEffect, useRef } from "react"
 import { DndProvider } from "react-dnd"
 import { HTML5Backend, NativeTypes } from "react-dnd-html5-backend"
 import { useDrop } from "react-dnd"
@@ -13,22 +13,49 @@ const GlobalStyle = createGlobalStyle`
     color: #000 !important;
     font-family: Open Sans !important;
   }
+  body {
+    margin: 0;
+  }
 `
 
-const Div = styled.div`
-  border: 1px solid gray;
-  height: 15rem;
-  width: 15rem;
-  padding: 2rem;
+const Button = styled.button`
+  box-shadow: 0px 1px 0px 0px #fff6af;
+	background: linear-gradient(to bottom, #ffec64 5%, #ffab23 100%);
+	background-color: #ffec64;
+	border-radius: 6px;
+	border: 1px solid #ffaa22;
+	display: inline-block;
+	color: #333333;
+	padding: 16px 31px;
+	text-decoration: none;
+	text-shadow: 0px 1px 0px #ffee66;
+
+  height: 10rem;
+  width: 16rem;
   text-align: center;
   display: flex;
   justify-content: center;
   align-items: center;
-  border-radius: 1rem;
+
+  &:hover {
+    box-shadow: 6px 8px 8px 1px rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+    background:linear-gradient(to bottom, #ffab23 5%, #ffec64 100%);
+	  background-color:#ffab23;
+  }
+  &:active {
+    position:relative;
+	  top:1px;
+  }
+
+`
+
+const Input = styled.input`
+  display: none;
 `
 
 const TargetBox = (props) => {
-  const { onDrop } = props
+  const { onDrop, onChange } = props
   const [{ canDrop, isOver }, drop] = useDrop(
     () => ({
       accept: [NativeTypes.FILE],
@@ -44,56 +71,86 @@ const TargetBox = (props) => {
     }),
     [props]
   )
-
+  const fileInput = useRef(null)
   const isActive = canDrop && isOver
-  return <Div ref={drop}>{isActive ? "Release to drop" : "Drag PDFs here"}</Div>
+  const onClick = () => fileInput.current.click()
+  return (
+    <>
+      <Input
+        type="file"
+        accept=".pdf"
+        multiple
+        ref={fileInput}
+        onChange={onChange}
+      />
+      <Button ref={drop} onClick={onClick}>
+        <span>{isActive ? "Release to drop" : "Drag PDFs or click here"}</span>
+      </Button>
+    </>
+  )
 }
 
 const Container = styled.div`
-  height: calc(100vh - 16px);
+  height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
+  background: #f8f9fa;
 `
 // background: #f8f9fa;
 // width: 100vw;
 
 function App() {
   const [success, setSuccess] = useState(false)
-  const [droppedFiles, setDroppedFiles] = useState([])
+  const [files, setFiles] = useState([])
 
   const handleFileDrop = useCallback(
     (item) => {
       if (item) {
         const files = item.files
-        setDroppedFiles(files)
+        setFiles(files)
       }
     },
-    [setDroppedFiles]
+    [setFiles]
   )
+  const handleFileAdd = useCallback(
+    (event) => {
+      if (event.target.files) {
+
+      }
+      setFiles(event.target.files)
+    },
+    []
+  )
+
   useEffect(() => {
-    if (droppedFiles.length) {
-      droppedFiles.forEach(async (file) => {
-        const existingPdfBytes = await file.arrayBuffer()
-        const pdfDocInput = await PDFDocument.load(existingPdfBytes)
-        const pdfDocOutput = await PDFDocument.create()
-        const pages = pdfDocInput.getPages()
-        if (pages.length) {
-          for (let i = 0; i < pages.length; i++) {
-            const [page] = await pdfDocOutput.copyPages(pdfDocInput, [i])
-            pdfDocOutput.addPage(page)
-            pdfDocOutput.addPage()
+    const handle = async () => {
+      if (files.length) {
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i]
+          const existingPdfBytes = await file.arrayBuffer()
+          const pdfDocInput = await PDFDocument.load(existingPdfBytes)
+          const pdfDocOutput = await PDFDocument.create()
+          const pages = pdfDocInput.getPages()
+          if (pages.length) {
+            for (let i = 0; i < pages.length; i++) {
+              const [page] = await pdfDocOutput.copyPages(pdfDocInput, [i])
+              pdfDocOutput.addPage(page)
+              pdfDocOutput.addPage()
+            }
           }
+          const blob = new Blob([await pdfDocOutput.save()], {
+            type: "application/pdf;charset=utf-8",
+          })
+          saveAs(blob, `${Date.now()}-${file.name}`)
+          setSuccess(true)
+          setFiles([])
         }
-        const blob = new Blob([await pdfDocOutput.save()], {
-          type: "application/pdf;charset=utf-8",
-        })
-        saveAs(blob, `${Date.now()}-${file.name}`)
-        setSuccess(true)
-      })
+      }
     }
-  }, [droppedFiles])
+    handle()
+  }, [files])
   const config = {
     angle: "25",
     spread: "360",
@@ -113,7 +170,7 @@ function App() {
       <GlobalStyle />
       <DndProvider backend={HTML5Backend}>
         <Container>
-          <TargetBox onDrop={handleFileDrop} />
+          <TargetBox onDrop={handleFileDrop} onChange={handleFileAdd} />
           <Confetti active={success} config={config} />
         </Container>
       </DndProvider>
