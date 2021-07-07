@@ -9,9 +9,8 @@ import Confetti from "react-dom-confetti"
 
 const GlobalStyle = createGlobalStyle`
   html * {
-    font-size: 1em !important;
-    color: #000 !important;
-    font-family: Open Sans !important;
+    font-size: 1em;
+    font-family: 'Indie Flower', cursive !important;
   }
   body {
     margin: 0;
@@ -29,6 +28,7 @@ const Button = styled.button`
 	padding: 16px 31px;
 	text-decoration: none;
 	text-shadow: 0px 1px 0px #ffee66;
+  color: #d44141e3;
 
   height: 10rem;
   width: 16rem;
@@ -46,6 +46,9 @@ const Button = styled.button`
   &:active {
     position:relative;
 	  top:1px;
+  }
+  & span {
+    font-size: 1.5em;
   }
 
 `
@@ -84,7 +87,7 @@ const TargetBox = (props) => {
         onChange={onChange}
       />
       <Button ref={drop} onClick={onClick}>
-        <span>{isActive ? "Release to drop" : "Drag PDFs or click here"}</span>
+        <span>{isActive ? "RELEASE TO DROP" : "DRAG PDFs OR CLICK HERE"}</span>
       </Button>
     </>
   )
@@ -96,7 +99,8 @@ const Container = styled.div`
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  background: #f8f9fa;
+  background-color: #d4418e;
+  background-image: linear-gradient(315deg, #d4418e 0%, #0652c5 74%);
 `
 // background: #f8f9fa;
 // width: 100vw;
