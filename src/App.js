@@ -88,7 +88,7 @@ const TargetBox = (props) => {
         onChange={onChange}
       />
       <Button ref={drop} onClick={onClick}>
-        <DragDrop />
+        <DragDrop isActive={isActive} />
         <Click />
       </Button>
     </>
