@@ -6,6 +6,8 @@ import { PDFDocument } from "pdf-lib"
 import { saveAs } from "file-saver"
 import styled, { createGlobalStyle } from "styled-components"
 import Confetti from "react-dom-confetti"
+import DragDrop from "./DragDrop"
+import Click from "./Click"
 
 const GlobalStyle = createGlobalStyle`
   html * {
@@ -19,15 +21,15 @@ const GlobalStyle = createGlobalStyle`
 
 const Button = styled.button`
   box-shadow: 0px 1px 0px 0px #fff6af;
-	background: linear-gradient(to bottom, #ffec64 5%, #ffab23 100%);
-	background-color: #ffec64;
-	border-radius: 6px;
-	border: 1px solid #ffaa22;
-	display: inline-block;
-	color: #333333;
-	padding: 16px 31px;
-	text-decoration: none;
-	text-shadow: 0px 1px 0px #ffee66;
+  background: linear-gradient(to bottom, #ffec64 5%, #ffab23 100%);
+  background-color: #ffec64;
+  border-radius: 6px;
+  border: 1px solid #ffaa22;
+  display: inline-block;
+  color: #333333;
+  padding: 16px 31px;
+  text-decoration: none;
+  text-shadow: 0px 1px 0px #ffee66;
   color: #d44141e3;
 
   height: 10rem;
@@ -40,17 +42,16 @@ const Button = styled.button`
   &:hover {
     box-shadow: 6px 8px 8px 1px rgba(0, 0, 0, 0.5);
     cursor: pointer;
-    background:linear-gradient(to bottom, #ffab23 5%, #ffec64 100%);
-	  background-color:#ffab23;
+    background: linear-gradient(to bottom, #ffab23 5%, #ffec64 100%);
+    background-color: #ffab23;
   }
   &:active {
-    position:relative;
-	  top:1px;
+    position: relative;
+    top: 1px;
   }
   & span {
     font-size: 1.5em;
   }
-
 `
 
 const Input = styled.input`
@@ -87,7 +88,8 @@ const TargetBox = (props) => {
         onChange={onChange}
       />
       <Button ref={drop} onClick={onClick}>
-        <span>{isActive ? "RELEASE TO DROP" : "DRAG PDFs OR CLICK HERE"}</span>
+        <DragDrop />
+        <Click />
       </Button>
     </>
   )
@@ -118,15 +120,11 @@ function App() {
     },
     [setFiles]
   )
-  const handleFileAdd = useCallback(
-    (event) => {
-      if (event.target.files) {
-
-      }
-      setFiles(event.target.files)
-    },
-    []
-  )
+  const handleFileAdd = useCallback((event) => {
+    if (event.target.files) {
+    }
+    setFiles(event.target.files)
+  }, [])
 
   useEffect(() => {
     const handle = async () => {
@@ -147,7 +145,8 @@ function App() {
           const blob = new Blob([await pdfDocOutput.save()], {
             type: "application/pdf;charset=utf-8",
           })
-          saveAs(blob, `${Date.now()}-${file.name}`)
+          console.log(file)
+          saveAs(blob, file.name.replace(".pdf", "_dop.pdf"))
           setSuccess(true)
           setFiles([])
         }
